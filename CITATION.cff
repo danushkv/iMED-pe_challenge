@@ -1,0 +1,10 @@
+cff-version: 1.2.0
+message: "If you use this code, cite this repository and the iMED Pose Estimation Challenge."
+title: "Multi-view Camera Pose Estimation for the iMED-PE Challenge"
+type: software
+authors:
+  - name: "iMED-PE challenge submission authors"
+version: 0.1.0
+date-released: 2026-08-24
+repository-code: "https://github.com/REPLACE_WITH_ACCOUNT/iMED-pe_challenge"
+

@@ -1,0 +1,12 @@
+frontend: efficient_loftr
+repository: https://github.com/zju3dv/EfficientLoFTR
+commit: ffd4a4644064354468eb1f0c7a3e732233cb732f
+checkpoint: weights/eloftr_outdoor.ckpt
+checkpoint_sha256: 0af6291141c736e75e94b7f8aae4399b77c7731b3f08758212b2cfe370188878
+model_type: full
+precision: fp32
+confidence_threshold: 0.8
+association_tolerance_original_pixels: 3.0
+input_resize: "600x480 -> 576x480"
+selected_usage: method2a_multiview_observations_in_method4a
+

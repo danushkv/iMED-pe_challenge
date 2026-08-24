@@ -1,0 +1,15 @@
+method: method1_5_rotation_anchored_vo
+anchor_interval: 5
+alpha: 0.75
+max_correction_degrees: 5.0
+max_anchor_disagreement_degrees: null
+thresholds:
+  min_matches: 195
+  min_essential_inliers: 104
+  min_inlier_ratio: 0.45680839411515767
+  min_cheirality_fraction: 1.0
+  max_median_sampson_error: 0.0004961793617389472
+  derivation_lower_quantile: 0.05
+  derivation_upper_quantile: 0.95
+  training_anchor_count: 6095
+

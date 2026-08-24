@@ -1,0 +1,29 @@
+[project]
+name = "imedpe-challenge-docker-environment"
+version = "0.1.0"
+requires-python = ">=3.10,<3.11"
+dependencies = [
+  "einops==0.8.1",
+  "joblib==1.4.2",
+  "kornia==0.8.2",
+  "lightglue",
+  "loguru==0.7.3",
+  "numpy==1.26.4",
+  "opencv-python-headless==4.9.0.80",
+  "scipy==1.11.4",
+  "torch==2.1.2+cu118",
+  "torchvision==0.16.2+cu118",
+  "tqdm==4.66.4",
+  "yacs==0.1.8",
+]
+
+[tool.uv.sources]
+lightglue = { git = "https://github.com/cvg/LightGlue.git", rev = "eb42fee2d71449efb0aa5c10549752b5d75384d8" }
+torch = { index = "pytorch-cu118" }
+torchvision = { index = "pytorch-cu118" }
+
+[[tool.uv.index]]
+name = "pytorch-cu118"
+url = "https://download.pytorch.org/whl/cu118"
+explicit = true
+

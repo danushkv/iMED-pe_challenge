@@ -1,0 +1,20 @@
+method2a:
+  stereo_source: endoscope1
+method2b:
+  stereo_source: endoscope2
+shared:
+  frontend: aliked_lightglue
+  max_keypoints: 2048
+  min_shared_tracks: 8
+  min_depth: 0.05
+  max_depth: 200.0
+  use_calibration_depth_bounds: true
+  max_stereo_reprojection_error_px: 2.0
+  min_triangulation_angle_deg: 0.0
+  pnp_min_points: 8
+  pnp_min_inliers: 8
+  pnp_iterations: 200
+  pnp_reprojection_error_px: 3.0
+  pnp_confidence: 0.999
+  refine_lm: true
+

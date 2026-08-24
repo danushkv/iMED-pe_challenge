@@ -1,0 +1,23 @@
+components:
+  baseline:
+    repository: https://github.com/imed-challenge/imedpe
+    development_base_commit: a2267625c51f52c5e14ec5f1cd0610ec57a44eaf
+    redistribution: pending_upstream_license_clarification
+  lightglue:
+    repository: https://github.com/cvg/LightGlue
+    commit: eb42fee2d71449efb0aa5c10549752b5d75384d8
+  xfeat:
+    repository: https://github.com/verlab/accelerated_features
+    commit: e92685f57f8318b18725c5c8c0bd28c7fe188d9a
+    checkpoint: weights/xfeat.pt
+    sha256: 0f5187fd7bedd26c7fe6acc9685444493a165a35ecc087b33c2db3627f3ea10b
+  efficient_loftr:
+    repository: https://github.com/zju3dv/EfficientLoFTR
+    commit: ffd4a4644064354468eb1f0c7a3e732233cb732f
+    checkpoint: weights/eloftr_outdoor.ckpt
+    sha256: 0af6291141c736e75e94b7f8aae4399b77c7731b3f08758212b2cfe370188878
+  vggt:
+    repository: https://github.com/facebookresearch/vggt
+    commit: a288dd0f14786c93483e45524328726ab7b1b4ce
+    checkpoint: facebook/VGGT-1B
+

@@ -1,0 +1,18 @@
+# Read-only snapshot inspected from the local pe-basline uv environment.
+# Python 3.10.12, uv 0.11.26. Transitive packages are fixed by root uv.lock.
+einops==0.8.2
+joblib==1.5.3
+kornia==0.8.2
+lightglue @ git+https://github.com/cvg/LightGlue.git@eb42fee2d71449efb0aa5c10549752b5d75384d8
+loguru==0.7.3
+matplotlib==3.10.9
+numpy==2.2.6
+opencv-python==5.0.0.93
+pillow==12.3.0
+pyyaml==6.0.3
+scipy==1.15.3
+torch==2.13.0
+torchvision==0.28.0
+tqdm==4.70.0
+yacs==0.1.8
+

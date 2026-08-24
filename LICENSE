@@ -1,0 +1,17 @@
+SOURCE-AVAILABLE NOTICE
+
+Copyright (c) 2026 iMED-PE challenge submission authors.
+
+This repository contains original experiment code as well as code derived from
+the iMED Pose Estimation Challenge baseline. The baseline checkout used during
+development did not include a top-level license file. No permission beyond
+applicable law is granted for baseline-derived code until its licensing terms
+are clarified by the challenge organizers.
+
+Third-party projects and model weights are not relicensed here. They remain
+subject to their own licenses. See THIRD_PARTY.md.
+
+Before making this repository public, replace this notice with an appropriate
+license only after confirming the challenge baseline, dataset, and competition
+publication rules.
+

@@ -1,0 +1,45 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.venv/
+
+# Local data and generated artifacts
+data/
+datasets/
+outputs/
+results/raw/
+artifacts/
+checkpoints/
+weights/
+*.npz
+*.npy
+*.pt
+*.pth
+*.ckpt
+*.onnx
+*.json
+*.csv
+*.png
+*.jpg
+*.jpeg
+*.mp4
+
+# Keep repository metadata/configuration JSON if explicitly added later.
+!configs/**/*.json
+!third_party/**/*.json
+
+# Third-party source checkouts are installed by script, not committed.
+third_party/LightGlue/
+third_party/accelerated_features/
+third_party/EfficientLoFTR/
+third_party/vggt/
+
+# Editors / OS
+.idea/
+.vscode/
+.DS_Store
+

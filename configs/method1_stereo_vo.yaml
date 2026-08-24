@@ -1,0 +1,29 @@
+method: method1_stereo_vo
+frontend: aliked_lightglue
+max_keypoints: 2048
+calibration:
+  num_samples: 30
+  essential_ransac_threshold: 0.001
+  essential_ransac_probability: 0.999
+  min_matches: 50
+  min_essential_inliers: 30
+  min_inlier_ratio: 0.25
+  min_cheirality_fraction: 0.50
+  max_rotation_deviation_deg: 5.0
+  max_translation_deviation_deg: 20.0
+  min_stable_pairs: 3
+  min_stable_fraction: 0.50
+  max_pooled_points_per_pair: 400
+  max_epipolar_p95_px: 2.0
+  max_reprojection_median_px: 2.0
+vo:
+  min_shared_tracks: 8
+  min_depth: 0.05
+  max_depth: 200.0
+  max_stereo_reprojection_error_px: 2.0
+  pnp_min_points: 8
+  pnp_min_inliers: 8
+  pnp_iterations: 200
+  pnp_reprojection_error_px: 3.0
+  pnp_confidence: 0.999
+
