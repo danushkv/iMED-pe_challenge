@@ -74,3 +74,25 @@ which case only development sessions may select them.
 Raw prediction files and evaluation JSON are intentionally excluded. Recreate
 them with the commands in `docs/RUN_METHODS.md`.
 
+## Official hidden validation
+
+These are challenge-server results and are reported separately from the local
+TRAIN and released-TEST evaluations above. Lower is better.
+
+| Submission | Hidden mean ATE RMSE (mm) |
+|---|---:|
+| Method 2A | 2.474 |
+| Method 2B | 2.484 |
+| Method 4A-1 | 2.316 |
+| Method 4A-1 + XFeat E1 calibration | approximately 2.31* |
+| **Method 4A-1 + LoFTR-MV 2A** | **2.308** |
+| Method 4A-1 + LoFTR-MV A+B | 2.332 |
+
+\*The exact XFeat leaderboard value was not preserved in the experiment notes;
+replace this approximation if the exact score is recovered.
+
+Among the exact recorded scores, Method 4A-1 + LoFTR-MV 2A is currently the
+strongest hidden-validation submission. It improves on original Method 4A-1 by
+0.008 mm and on the LoFTR A+B variant by 0.024 mm. Hidden scores were not used
+to tune the LoFTR confidence threshold, association tolerance, or Method 4A
+fusion settings.
