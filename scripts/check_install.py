@@ -49,6 +49,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--require-xfeat", action="store_true")
     parser.add_argument("--require-loftr", action="store_true")
+    parser.add_argument("--require-roma", action="store_true")
     parser.add_argument("--require-vggt", action="store_true")
     args = parser.parse_args()
 
@@ -68,6 +69,12 @@ def main() -> None:
             "weights/eloftr_outdoor.ckpt",
             "0af6291141c736e75e94b7f8aae4399b77c7731b3f08758212b2cfe370188878",
             args.require_loftr,
+        ),
+        "RoMa": (
+            "77f8d68803526dcddfd9b7a46bc76125bdc25f15",
+            ".torch/hub/checkpoints/roma_outdoor.pth",
+            "c7a45c80d41ad788a63c641d1b686d7cb3f297f40097c6f4e75039889e5cc8ba",
+            args.require_roma,
         ),
         "vggt": (
             "a288dd0f14786c93483e45524328726ab7b1b4ce",
@@ -102,4 +109,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

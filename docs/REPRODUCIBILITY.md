@@ -8,8 +8,9 @@ The release was assembled from the working challenge repository at Git commit:
 a2267625c51f52c5e14ec5f1cd0610ec57a44eaf
 ```
 
-Canonical method code was copied from `src/imcpe`; XFeat, EfficientLoFTR, and
-LOSO code came from their isolated experiment directories. Generated outputs,
+Canonical method code was copied from `src/imcpe`; XFeat, EfficientLoFTR,
+RoMa-2A, Method 5-R, and LOSO code came from their isolated experiment
+directories. Generated outputs,
 third-party checkouts, checkpoints, dataset files, and Python caches were not
 copied.
 
@@ -19,6 +20,7 @@ copied.
   `pe-basline` research environment, with transitive resolution locked.
 - `environments/docker/`: frozen CUDA 11.8 challenge-container stack.
 - `environments/vggt/`: camera-only VGGT experiment stack.
+- `environments/roma/`: full-RoMa, fused-local-correlation, and CUDA 13 stack.
 
 Use `uv sync --frozen`; omitting `--frozen` permits dependency re-resolution
 and is not recommended for result reproduction.
@@ -61,11 +63,13 @@ recreated with the documented evaluation commands.
 uv sync --extra dev --frozen
 bash third_party/setup_models.sh --xfeat
 bash third_party/setup_models.sh --loftr
+bash third_party/setup_models.sh --roma
 uv run --frozen python scripts/check_install.py --require-xfeat --require-loftr
+uv sync --project environments/roma --frozen
+uv run --project environments/roma python scripts/check_install.py --require-roma
 uv run --frozen pytest
 uv run --frozen python scripts/audit_release.py
 ```
 
 No dataset is needed for these static/synthetic checks. Model inference begins
 only when a user invokes one of the run scripts with `--data-root`.
-

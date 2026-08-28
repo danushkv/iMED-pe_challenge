@@ -45,3 +45,27 @@ pure LoFTR multi-view variant used mutual nearest association between LoFTR
 stereo and cross-camera source coordinates in original image pixels. The
 selected setting used confidence 0.8 and a 3 px tolerance.
 
+## RoMa-2A
+
+RoMa-2A extracts up to 2048 ALIKED pixels once in E1-L and samples two dense
+full-RoMa warps at those exact source coordinates: E1-L to E1-R and E1-L to
+E2-L. This creates exact-index three-view tracks without nearest-neighbour
+association between independently detected sets. The frozen configuration uses
+certainty at least 0.20 and forward/backward cycle error at most 2 original
+image pixels. Original Method-2A calibration, triangulation, PnP, refinement,
+and frame-zero normalization remain unchanged.
+
+## Method 5-R — stable session stereo correction
+
+Method 5-R estimates a small six-parameter correction around the original E1
+session stereo transform. It preserves baseline magnitude, bounds rotation to
+3 degrees and translation-direction change to 5 degrees, and uses strong
+priors. Each candidate is fitted from deterministic frames distributed across
+the physical session and evaluated without ground truth.
+
+A correction is accepted only when the optimizer converges, stays within
+bounds, passes split-half and cross-sequence stability checks, and lowers the
+total robust objective. Per-view reprojection statistics remain diagnostics;
+they are not hard vetoes. Invalid corrections fall back to the original session
+calibration. The selected trajectory replaces only the RoMa-2A observations in
+the otherwise frozen Method-4A stack.

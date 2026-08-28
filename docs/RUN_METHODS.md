@@ -9,6 +9,8 @@ export XFEAT_ROOT="$PWD/third_party/accelerated_features"
 export XFEAT_WEIGHTS="$XFEAT_ROOT/weights/xfeat.pt"
 export LOFTR_ROOT="$PWD/third_party/EfficientLoFTR"
 export LOFTR_CHECKPOINT="$LOFTR_ROOT/weights/eloftr_outdoor.ckpt"
+export ROMA_ROOT="$PWD/third_party/RoMa"
+export ROMA_TORCH_HOME="$ROMA_ROOT/.torch"
 ```
 
 Use `--split test` only after fixing all settings from TRAIN/session-balanced
@@ -224,6 +226,135 @@ For submission-safe experiments, `--frame-zero-fallback-root` may point to the
 corresponding original Method 2 prediction root. Such outputs must be labeled
 as fallback variants rather than pure LoFTR-MV.
 
+## RoMa-2A
+
+Install the separate frozen environment and verify the official checkout and
+weights before inference:
+
+```bash
+uv sync --project environments/roma --frozen
+bash third_party/setup_models.sh --roma
+PYTHONPATH="$PWD/src:$PWD" uv run --project environments/roma python \
+  scripts/check_install.py --require-roma
+```
+
+Generate exact-index RoMa-2A observations with the TRAIN-frozen certainty and
+cycle thresholds:
+
+```bash
+PYTHONPATH="$PWD/src:$PWD" uv run --project environments/roma python -m \
+  experiments.roma_2a.run_method2a_roma \
+  --data-root "$IMEDPE_DATA_ROOT" \
+  --split train \
+  --calibration-root "$IMEDPE_OUTPUT_ROOT/calibration/e1" \
+  --roma-root "$ROMA_ROOT" \
+  --torch-home "$ROMA_TORCH_HOME" \
+  --device cuda \
+  --max-source-points 2048 \
+  --certainty-threshold 0.20 \
+  --cycle-threshold-px 2 \
+  --debug-frames 0 \
+  --output-root "$IMEDPE_OUTPUT_ROOT/roma2a"
+```
+
+## Method 5-R and frozen RoMa/4A fusion
+
+Method 5-R estimates one small E1 stereo correction per physical session. The
+same global validity rule is used for every session, and an invalid fit falls
+back to the original calibration. These commands do not read ground truth.
+
+Cache deterministic observations across all discovered sessions:
+
+```bash
+PYTHONPATH="$PWD/src:$PWD" uv run --project environments/roma python -m \
+  experiments.method5_stereo_refinement.cache_observations \
+  --data-root "$IMEDPE_DATA_ROOT" \
+  --split train \
+  --calibration-root "$IMEDPE_OUTPUT_ROOT/calibration/e1" \
+  --roma-prediction-root "$IMEDPE_OUTPUT_ROOT/roma2a" \
+  --roma-root "$ROMA_ROOT" \
+  --torch-home "$ROMA_TORCH_HOME" \
+  --device cuda \
+  --max-source-points 2048 \
+  --certainty-threshold 0.20 \
+  --cycle-threshold-px 2 \
+  --frames-per-session 30 \
+  --tracks-per-frame 150 \
+  --output-root "$IMEDPE_OUTPUT_ROOT/method5r/cache"
+```
+
+Run the frozen optimizer, apply the relaxed GT-free validity rule, and verify
+the selected calibration export:
+
+```bash
+PYTHONPATH="$PWD/src:$PWD" uv run --project environments/roma python -m \
+  experiments.method5_stereo_refinement.run_refinement \
+  --cache-root "$IMEDPE_OUTPUT_ROOT/method5r/cache" \
+  --calibration-root "$IMEDPE_OUTPUT_ROOT/calibration/e1" \
+  --rotation-bound-deg 3 \
+  --translation-bound-deg 5 \
+  --rotation-prior 100 \
+  --translation-prior 100 \
+  --huber-delta-px 2 \
+  --max-nfev 80 \
+  --output-root "$IMEDPE_OUTPUT_ROOT/method5r/fits"
+
+PYTHONPATH="$PWD/src:$PWD" uv run --project environments/roma python -m \
+  experiments.method5_relaxed.apply_relaxed_rule \
+  --strict-run "$IMEDPE_OUTPUT_ROOT/method5r/fits" \
+  --original-calibration-root "$IMEDPE_OUTPUT_ROOT/calibration/e1" \
+  --output-root "$IMEDPE_OUTPUT_ROOT/method5r/selected"
+
+PYTHONPATH="$PWD/src:$PWD" uv run --project environments/roma python -m \
+  experiments.method5_relaxed.verify_exports \
+  --original-root "$IMEDPE_OUTPUT_ROOT/calibration/e1" \
+  --selected-root "$IMEDPE_OUTPUT_ROOT/method5r/selected/calibration" \
+  --relaxed-summary "$IMEDPE_OUTPUT_ROOT/method5r/selected/relaxed_summary.json" \
+  --output "$IMEDPE_OUTPUT_ROOT/method5r/selected/verification.json"
+```
+
+Regenerate RoMa-2A with the selected calibration and replace only the 2A branch
+of frozen Method 4A:
+
+```bash
+PYTHONPATH="$PWD/src:$PWD" uv run --project environments/roma python -m \
+  experiments.roma_2a.run_method2a_roma \
+  --data-root "$IMEDPE_DATA_ROOT" \
+  --split train \
+  --calibration-root "$IMEDPE_OUTPUT_ROOT/method5r/selected/calibration" \
+  --roma-root "$ROMA_ROOT" \
+  --torch-home "$ROMA_TORCH_HOME" \
+  --device cuda \
+  --max-source-points 2048 \
+  --certainty-threshold 0.20 \
+  --cycle-threshold-px 2 \
+  --debug-frames 0 \
+  --output-root "$IMEDPE_OUTPUT_ROOT/method5r/roma2a"
+
+PYTHONPATH="$PWD/src:$PWD" uv run --project environments/roma python \
+  scripts/run_method4a.py \
+  --split train \
+  --method1-root "$IMEDPE_OUTPUT_ROOT/method1" \
+  --method2a-root "$IMEDPE_OUTPUT_ROOT/method5r/roma2a" \
+  --method2b-root "$IMEDPE_OUTPUT_ROOT/method2b" \
+  --rotation-root "$IMEDPE_OUTPUT_ROOT/method1_5" \
+  --mode 4a1 \
+  --confidence-version v1 \
+  --lambda-vo 5 \
+  --absolute-weight-scale 1 \
+  --vo-weight-scale 1 \
+  --huber-delta-steps 2.5 \
+  --alignment-iterations 8 \
+  --alignment-huber-mad 2.5 \
+  --optimizer-max-nfev 200 \
+  --output-root "$IMEDPE_OUTPUT_ROOT/method5r/roma2a4a"
+```
+
+For an unseen split, repeat original session calibration, RoMa-2A, correction
+estimation, selection, and prediction from that split's images. Never reuse a
+calibration from another physical session or bundle released TRAIN/TEST
+calibration outputs in a submission.
+
 ## Evaluation
 
 ```bash
@@ -244,4 +375,3 @@ uv run python experiments/session_holdout_validation/evaluate_loso.py \
   --baseline-name baseline \
   --output-root "$IMEDPE_OUTPUT_ROOT/evaluation/loso_train"
 ```
-

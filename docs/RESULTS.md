@@ -24,6 +24,9 @@ sequences. These numbers are not official hidden-test scores.
 | Method 4A-1 + LoFTR-MV 2A | 0.8968 | **1.1402** |
 | Method 4A-1 + LoFTR-MV 2B | 0.8930 | 1.1867 |
 | Method 4A-1 + LoFTR-MV A+B | 0.9073 | 1.1710 |
+| RoMa-2A | 1.0057 | 1.3089 |
+| Method 4A-1 + RoMa-2A | 0.8477 | 1.1465 |
+| **Method 5R + Method 4A-1 + RoMa-2A** | **0.8444** | 1.1447 |
 
 Bold marks the best local result in each column, not a claim of unseen-session
 superiority.
@@ -45,6 +48,9 @@ which case only development sessions may select them.
 | Method 4A-1 + LoFTR-MV 2A | 0.9576 | 1.4647 |
 | Method 4A-1 + LoFTR-MV 2B | 0.9837 | 1.5356 |
 | Method 4A-1 + LoFTR-MV A+B | 0.9758 | 1.3726 |
+| RoMa-2A | 1.3025 | 3.1589 |
+| Method 4A-1 + RoMa-2A | 0.8861 | 1.2388 |
+| **Method 5R + Method 4A-1 + RoMa-2A** | **0.8777** | **1.2356** |
 
 ### Released TEST: four sessions
 
@@ -59,6 +65,9 @@ which case only development sessions may select them.
 | Method 4A-1 + LoFTR-MV 2A | **1.1715** | 2.0349 |
 | Method 4A-1 + LoFTR-MV 2B | 1.2372 | 2.0335 |
 | Method 4A-1 + LoFTR-MV A+B | 1.2172 | **2.0125** |
+| RoMa-2A | 1.4205 | 2.1265 |
+| Method 4A-1 + RoMa-2A | 1.1806 | 2.0371 |
+| Method 5R + Method 4A-1 + RoMa-2A | **1.1787** | 2.0371 |
 
 ## Interpretation
 
@@ -70,6 +79,11 @@ which case only development sessions may select them.
 - TRAIN and released TEST disagree on the best front-end variant. This is why
   all variants and LOSO statistics are reported instead of presenting one
   cherry-picked number.
+- Method 5-R made only a small change, but the frozen RoMa/4A stack improved
+  ordinary and session-balanced ATE on both TRAIN and released TEST. Its TEST
+  worst-session ATE was unchanged, and its tail/CV diagnostics were not
+  uniformly better, so this is reported as a narrow calibration result rather
+  than a new general optimizer.
 
 Raw prediction files and evaluation JSON are intentionally excluded. Recreate
 them with the commands in `docs/RUN_METHODS.md`.
@@ -87,6 +101,8 @@ TRAIN and released-TEST evaluations above. Lower is better.
 | Method 4A-1 + XFeat E1 calibration | approximately 2.31* |
 | **Method 4A-1 + LoFTR-MV 2A** | **2.308** |
 | Method 4A-1 + LoFTR-MV A+B | 2.332 |
+| RoMa-2A standalone | 2.341 |
+| Method 4A-1 + RoMa-2A | 2.310 |
 
 \*The exact XFeat leaderboard value was not preserved in the experiment notes;
 replace this approximation if the exact score is recovered.

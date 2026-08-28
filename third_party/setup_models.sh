@@ -6,6 +6,7 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 LIGHTGLUE_COMMIT="eb42fee2d71449efb0aa5c10549752b5d75384d8"
 XFEAT_COMMIT="e92685f57f8318b18725c5c8c0bd28c7fe188d9a"
 LOFTR_COMMIT="ffd4a4644064354468eb1f0c7a3e732233cb732f"
+ROMA_COMMIT="77f8d68803526dcddfd9b7a46bc76125bdc25f15"
 VGGT_COMMIT="a288dd0f14786c93483e45524328726ab7b1b4ce"
 
 clone_revision() {
@@ -77,6 +78,35 @@ setup_loftr() {
     "$checkpoint"
 }
 
+setup_roma() {
+  clone_revision \
+    https://github.com/Parskatt/RoMa.git \
+    "$ROMA_COMMIT" \
+    "$ROOT_DIR/third_party/RoMa"
+  local checkpoint_root="$ROOT_DIR/third_party/RoMa/.torch/hub/checkpoints"
+  local missing=0
+  for checkpoint in roma_outdoor.pth dinov2_vitl14_pretrain.pth aliked-n16.pth; do
+    if [[ ! -f "$checkpoint_root/$checkpoint" ]]; then
+      echo "Missing official checkpoint: $checkpoint_root/$checkpoint"
+      missing=1
+    fi
+  done
+  if [[ "$missing" == 1 ]]; then
+    echo "Retrieve the three checkpoints through the official RoMa/torch-hub APIs"
+    echo "in an environment where their licenses permit it, then rerun this command."
+    return
+  fi
+  verify_sha256 \
+    c7a45c80d41ad788a63c641d1b686d7cb3f297f40097c6f4e75039889e5cc8ba \
+    "$checkpoint_root/roma_outdoor.pth"
+  verify_sha256 \
+    d5383ea8f4877b2472eb973e0fd72d557c7da5d3611bd527ceeb1d7162cbf428 \
+    "$checkpoint_root/dinov2_vitl14_pretrain.pth"
+  verify_sha256 \
+    5be8704840ed662d9d8c561bf7279c222092674e7eb05fd0feab94899e9d82f2 \
+    "$checkpoint_root/aliked-n16.pth"
+}
+
 setup_vggt() {
   clone_revision \
     https://github.com/facebookresearch/vggt.git \
@@ -87,7 +117,7 @@ setup_vggt() {
 }
 
 usage() {
-  echo "Usage: $0 [--all|--lightglue|--xfeat|--loftr|--vggt]"
+  echo "Usage: $0 [--all|--lightglue|--xfeat|--loftr|--roma|--vggt]"
 }
 
 [[ $# -gt 0 ]] || {
@@ -101,13 +131,14 @@ for option in "$@"; do
       setup_lightglue
       setup_xfeat
       setup_loftr
+      setup_roma
       setup_vggt
       ;;
     --lightglue) setup_lightglue ;;
     --xfeat) setup_xfeat ;;
     --loftr) setup_loftr ;;
+    --roma) setup_roma ;;
     --vggt) setup_vggt ;;
     *) usage; exit 2 ;;
   esac
 done
-

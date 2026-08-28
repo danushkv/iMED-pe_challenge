@@ -1,0 +1,17 @@
+method: roma_2a
+frontend:
+  source_detector: aliked
+  max_source_points: 2048
+  matcher: roma_full_outdoor
+  certainty_threshold: 0.20
+  cycle_threshold_px: 2.0
+geometry:
+  stereo_calibration: method2a_session_e1
+  triangulation: original_method2a
+  pnp: original_method2a
+  exact_source_identity: true
+notes:
+  - RoMa is evaluated at the exact ALIKED E1-L source pixels.
+  - No nearest-neighbour merge between independently detected match sets is used.
+  - Coordinates and cycle errors are expressed in original-image pixels.
+

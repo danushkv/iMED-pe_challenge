@@ -23,6 +23,8 @@ experiments.
 | Method 4A | Robust fusion of Method 2A/2B absolute poses and Method 1 VO edges |
 | XFeat | Sparse-XFeat front-end ablations and XFeat-calibrated Method 4A |
 | EfficientLoFTR | Pairwise and pure three-view LoFTR experiments for Method 2/4A |
+| RoMa-2A | Exact-index ALIKED source pixels warped into E1-R and E2-L by full RoMa |
+| Method 5-R | Geometry-only E1 stereo correction followed by RoMa-2A and frozen Method 4A |
 
 The exact transform conventions are documented in
 [`docs/TRANSFORMS.md`](docs/TRANSFORMS.md). Frozen experiment settings are in
@@ -34,7 +36,7 @@ The exact transform conventions are documented in
 configs/        frozen method settings
 docs/           dataset contract, methods, results, and reproducibility notes
 environments/   separate VGGT environment
-experiments/    XFeat, EfficientLoFTR, and LOSO experiment code
+experiments/    XFeat, EfficientLoFTR, RoMa, Method 5-R, and LOSO code
 scripts/        calibration, inference, evaluation, and visualization CLIs
 src/imcpe/      shared geometry and method implementations
 tests/          dependency-free/synthetic safety checks
@@ -64,6 +66,7 @@ weights are handled separately because they have their own licenses:
 bash third_party/setup_models.sh --lightglue
 bash third_party/setup_models.sh --xfeat
 bash third_party/setup_models.sh --loftr
+bash third_party/setup_models.sh --roma
 ```
 
 The helper clones exact commits and explains where an official checkpoint must
@@ -187,6 +190,10 @@ uv run python scripts/run_method4a.py \
 The XFeat, EfficientLoFTR, and VGGT commands are in
 [`docs/RUN_METHODS.md`](docs/RUN_METHODS.md).
 
+RoMa-2A and Method 5-R use the separate locked environment under
+`environments/roma/`. Their complete frozen commands are also documented in
+[`docs/RUN_METHODS.md`](docs/RUN_METHODS.md).
+
 ## Evaluation and visualizations
 
 Evaluation uses the repository's challenge-compatible Horn/Sim(3) alignment,
@@ -218,7 +225,7 @@ the current comparison tables are in [`docs/RESULTS.md`](docs/RESULTS.md).
 
 There are no challenge-trained checkpoints. All challenge-specific calibration
 and anchor caches are estimated independently per session at inference time.
-ALIKED/LightGlue, XFeat, EfficientLoFTR, and VGGT use official third-party
+ALIKED/LightGlue, XFeat, EfficientLoFTR, RoMa, and VGGT use official third-party
 pretrained weights. Do not re-upload those weights under this project's name;
 link to their official model cards/releases and preserve their licenses.
 

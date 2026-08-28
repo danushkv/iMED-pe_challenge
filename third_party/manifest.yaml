@@ -16,8 +16,16 @@ components:
     commit: ffd4a4644064354468eb1f0c7a3e732233cb732f
     checkpoint: weights/eloftr_outdoor.ckpt
     sha256: 0af6291141c736e75e94b7f8aae4399b77c7731b3f08758212b2cfe370188878
+  roma:
+    repository: https://github.com/Parskatt/RoMa
+    commit: 77f8d68803526dcddfd9b7a46bc76125bdc25f15
+    checkpoint: .torch/hub/checkpoints/roma_outdoor.pth
+    checkpoint_sha256: c7a45c80d41ad788a63c641d1b686d7cb3f297f40097c6f4e75039889e5cc8ba
+    backbone: .torch/hub/checkpoints/dinov2_vitl14_pretrain.pth
+    backbone_sha256: d5383ea8f4877b2472eb973e0fd72d557c7da5d3611bd527ceeb1d7162cbf428
+    source_detector_checkpoint: .torch/hub/checkpoints/aliked-n16.pth
+    source_detector_sha256: 5be8704840ed662d9d8c561bf7279c222092674e7eb05fd0feab94899e9d82f2
   vggt:
     repository: https://github.com/facebookresearch/vggt
     commit: a288dd0f14786c93483e45524328726ab7b1b4ce
     checkpoint: facebook/VGGT-1B
-

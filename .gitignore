@@ -36,10 +36,10 @@ weights/
 third_party/LightGlue/
 third_party/accelerated_features/
 third_party/EfficientLoFTR/
+third_party/RoMa/
 third_party/vggt/
 
 # Editors / OS
 .idea/
 .vscode/
 .DS_Store
-

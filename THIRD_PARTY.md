@@ -9,6 +9,7 @@ weights. `third_party/manifest.yaml` records the exact revisions used.
 | LightGlue / ALIKED | `cvg/LightGlue` | `eb42fee2d71449efb0aa5c10549752b5d75384d8` |
 | XFeat | `verlab/accelerated_features` | `e92685f57f8318b18725c5c8c0bd28c7fe188d9a` |
 | EfficientLoFTR | `zju3dv/EfficientLoFTR` | `ffd4a4644064354468eb1f0c7a3e732233cb732f`, `eloftr_outdoor.ckpt` |
+| RoMa | `Parskatt/RoMa` | `77f8d68803526dcddfd9b7a46bc76125bdc25f15`, full `roma_outdoor.pth` |
 | VGGT | `facebookresearch/vggt` | `a288dd0f14786c93483e45524328726ab7b1b4ce`, `facebook/VGGT-1B` |
 
 Verified hashes for locally evaluated standalone checkpoints:
@@ -19,10 +20,18 @@ XFeat xfeat.pt:
 
 EfficientLoFTR eloftr_outdoor.ckpt:
 0af6291141c736e75e94b7f8aae4399b77c7731b3f08758212b2cfe370188878
+
+RoMa roma_outdoor.pth:
+c7a45c80d41ad788a63c641d1b686d7cb3f297f40097c6f4e75039889e5cc8ba
+
+RoMa DINOv2 ViT-L/14 backbone:
+d5383ea8f4877b2472eb973e0fd72d557c7da5d3611bd527ceeb1d7162cbf428
+
+ALIKED N16 source detector used by RoMa-2A:
+5be8704840ed662d9d8c561bf7279c222092674e7eb05fd0feab94899e9d82f2
 ```
 
 LightGlue/ALIKED and VGGT may retrieve weights through their official APIs on
 first use. Cache them before offline or Docker execution. Review every upstream
 license and model card before redistribution. A checksum verifies identity; it
 does not grant redistribution rights.
-

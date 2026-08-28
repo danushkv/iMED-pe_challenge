@@ -1,0 +1,33 @@
+method: method5r_roma2a_frozen_4a
+observation_cache:
+  source_points: 2048
+  certainty_threshold: 0.20
+  cycle_threshold_px: 2.0
+  frames_per_session: 30
+  tracks_per_frame: 150
+calibration_optimizer:
+  rotation_bound_deg: 3.0
+  translation_direction_bound_deg: 5.0
+  rotation_prior: 100.0
+  translation_prior: 100.0
+  huber_delta_px: 2.0
+  max_nfev: 80
+validity_rule:
+  require_optimizer_convergence: true
+  require_inside_bounds: true
+  require_split_half_stability: true
+  require_cross_sequence_stability_when_available: true
+  require_total_robust_objective_improvement: true
+  per_view_reprojection_veto: false
+fallback: original_session_e1_calibration
+frozen_method4a:
+  mode: 4a1
+  confidence_version: v1
+  lambda_vo: 5.0
+  absolute_weight_scale: 1.0
+  vo_weight_scale: 1.0
+  huber_delta_steps: 2.5
+  alignment_iterations: 8
+  alignment_huber_mad: 2.5
+  optimizer_max_nfev: 200
+

@@ -1,5 +1,9 @@
 # Docker
 
+The frozen Method 5-R RoMa/4A submission specification is documented in
+[`METHOD5R_HANDOFF.md`](METHOD5R_HANDOFF.md). It intentionally excludes any
+released-data calibration or prediction artifacts.
+
 Challenge submission images were developed separately for Method 4A-1,
 Method 4A-1 + XFeat calibration, and Method 4A-1 + EfficientLoFTR-MV.
 
@@ -12,4 +16,3 @@ commit image layers or model weights.
 The evaluated classical container basis was CUDA 11.8 / Ubuntu 22.04 / Python
 3.10 with the package versions pinned in the root `pyproject.toml` and
 `uv.lock`.
-
