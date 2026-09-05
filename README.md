@@ -168,11 +168,30 @@ export IMEDPE_DATA_ROOT=/path/to/imed_pe
 export IMEDPE_OUTPUT_ROOT=/path/to/generated_outputs
 ```
 
-Method 6B consumes original Method 1, Method 1.5A rotations, Method 2A,
+Method 6B usues original Method 1, Method 1.5A rotations, Method 2A,
 Method 2B, and EfficientLoFTR-2A predictions plus their inference diagnostics.
-Run those frozen prerequisites using [`docs/RUN_METHODS.md`](docs/RUN_METHODS.md),
-then build target-free router features and apply the bundled TRAIN-fitted
-router:
+It is the final routing and fusion stage. It does not rerun these upstream
+experts automatically.
+
+For a fresh target split, execute the pipeline in this order:
+
+1. Estimate the target session's [E1 and E2 stereo calibration](docs/RUN_METHODS.md#calibration).
+2. Run [Method 1 Stereo-VO](docs/RUN_METHODS.md#method-1).
+3. Run [Method 1.5A](docs/RUN_METHODS.md#method-15a) to produce the frozen
+   rotation source. Its confidence thresholds must be derived from TRAIN only.
+4. Run [Method 2A and Method 2B](docs/RUN_METHODS.md#method-2a-and-2b) with the
+   corresponding E1 and E2 calibration.
+5. Run [EfficientLoFTR multi-view Method 2A](docs/RUN_METHODS.md#efficientloftr-multi-view).
+6. Build the inference-only Method 6 feature bundle and apply the bundled
+   TRAIN-fitted router using the commands below.
+
+All upstream commands and their expected output locations are provided in
+[`docs/RUN_METHODS.md`](docs/RUN_METHODS.md). Method 4A does not need to be run
+separately: Method 6B applies its own routed version of the frozen
+VO-constrained optimizer.
+
+After steps 1–5, build target-free router features and produce the final
+trajectory:
 
 ```bash
 uv run python -m experiments.method6_router_ensemble.build_dataset \
