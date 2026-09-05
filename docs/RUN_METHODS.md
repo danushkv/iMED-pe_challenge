@@ -16,6 +16,18 @@ export ROMA_TORCH_HOME="$ROMA_ROOT/.torch"
 Use `--split test` only after fixing all settings from TRAIN/session-balanced
 validation. Examples below show TRAIN.
 
+## Baseline
+
+Run the image-pair ALIKED + LightGlue essential-matrix baseline:
+
+```bash
+uv run python scripts/run_baseline.py \
+  --data-root "$IMEDPE_DATA_ROOT" \
+  --split train \
+  --device cuda \
+  --output-root "$IMEDPE_OUTPUT_ROOT/baseline"
+```
+
 ## Calibration
 
 E1 and E2 calibrators automatically discover sessions in the supplied split:

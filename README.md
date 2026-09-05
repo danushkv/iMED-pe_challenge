@@ -26,7 +26,7 @@ They are released-split results, not a claim about the final hidden ranking.
 
 ## Qualitative results
 
-Each publication-style grid synchronizes the two stereo endoscopes with the
+Each grid synchronizes the two stereo endoscopes with the
 ground-truth and Method 6B trajectories after the same Sim(3) alignment used
 for evaluation.
 
@@ -36,7 +36,7 @@ for evaluation.
 | `session_004_scene_6_zoom_in` | `session_007_scene_5_circular` |
 
 The exact generation commands are under
-[Publication-style grids](#publication-style-grids). Full-resolution stills
+[get-grids](#publication-style-grids). Full-resolution stills
 are stored beside the GIFs for use in papers and presentations.
 
 ## Implemented methods
@@ -56,7 +56,12 @@ are stored beside the GIFs for use in papers and presentations.
 | Method 5-R | Geometry-only E1 stereo correction followed by RoMa-2A and frozen Method 4A |
 | **Method 6B** | **Soft reliability routing of Method 2A, Method 2B, and LoFTR-2A inside the VO-constrained fusion optimizer** |
 
-Method 6B is the best released-TEST method in this repository. It improves
+Each method can be run independently; there is no requirement to execute every
+experiment. See [`docs/METHODS.md`](docs/METHODS.md) for concise explanations
+and [`docs/RUN_METHODS.md`](docs/RUN_METHODS.md) for prerequisites and
+copy-paste commands for trying the different pipelines.
+
+Method 6B is the best released (internal) Test method in this repository. It improves
 mean ATE, session-balanced ATE, worst-session ATE, and frame-p95 error over the
 original Method 4A and 4A + LoFTR-2A. The full ablation is documented in
 [`docs/METHOD6_RESULTS.md`](docs/METHOD6_RESULTS.md).
@@ -195,7 +200,7 @@ strict physical-session LOSO and all-TRAIN commands in
 [`docs/RUN_METHODS.md`](docs/RUN_METHODS.md). Commands for every other method
 are documented there as well.
 
-## Evaluation and visualizations
+## Evaluation
 
 Evaluation uses the repository's challenge-compatible Horn/Sim(3) alignment,
 ATE, and RPE implementation:
@@ -207,7 +212,7 @@ uv run python scripts/evaluate_ate.py \
   --pred-root "$IMEDPE_OUTPUT_ROOT/method4a1"
 ```
 
-### Publication-style grids
+### Ouput grid visualization
 
 Create a compact README GIF, a full-resolution still, and an MP4 with
 synchronized endoscope frames and aligned Method 6B trajectories:
@@ -229,21 +234,11 @@ the complete comparison tables are in [`docs/RESULTS.md`](docs/RESULTS.md).
 
 ## Checkpoints
 
-The only challenge-trained artifact is the small Method 6 logistic router under
-`models/method6/`; it contains coefficients and robust feature-scaling values,
-not image features or dataset content. All challenge-specific calibration and
-anchor caches are estimated independently per session at inference time.
-ALIKED/LightGlue, XFeat, EfficientLoFTR, RoMa, and VGGT use official third-party
-pretrained weights. Do not re-upload those weights under this project's name;
-link to their official model cards/releases and preserve their licenses.
-
-## Citation and dataset attribution
-
-If this code helps your work, cite this repository using
-[`CITATION.cff`](CITATION.cff). Use of the data must additionally cite the
-[iMED Challenge](https://imed-challenge.github.io/) and the official dataset or
-challenge paper specified by the organizers; citing this software does not
-replace the dataset citation.
+Exact model variants, filenames, evaluated source revisions, official download
+links, expected local paths, and recorded SHA-256 hashes are listed in
+[`docs/CHECKPOINTS.md`](docs/CHECKPOINTS.md). Third-party weights are not
+redistributed here. The small TRAIN-fitted Method 6 router is included under
+`models/method6/` in both exact and version-independent formats.
 
 ## License
 
@@ -252,3 +247,32 @@ Third-party projects and weights retain their own terms; see
 [`THIRD_PARTY.md`](THIRD_PARTY.md) and [`NOTICE`](NOTICE). The upstream baseline
 currently does not publish a license, so baseline-derived files require the
 organizers' redistribution permission and are not relicensed by this project.
+
+## Citation
+
+If this code helps your work, please **cite us and star the repository**:
+
+```bibtex
+@software{imed_pe_challenge_methods_2026,
+  author  = {{iMED-PE Challenge Methods contributors}},
+  title   = {iMED-PE Challenge Methods: Multi-View Endoscopic Pose Estimation},
+  year    = {2026},
+  version = {0.1.0},
+  url     = {https://github.com/danushkv/iMED-pe_challenge}
+}
+```
+
+Use of the dataset must additionally acknowledge and cite the official iMED
+Challenge and its dataset/challenge paper when that citation is provided by the
+organizers:
+
+```bibtex
+@misc{imed_challenge_2026,
+  author = {{iMED Challenge Organizers}},
+  title  = {iMED Challenge 2026},
+  year   = {2026},
+  url    = {https://imed-challenge.github.io/}
+}
+```
+
+Citing this software does not replace the dataset citation or its terms of use.
