@@ -1,0 +1,46 @@
+method: method6b
+
+experts:
+  absolute:
+    - original_method2a
+    - original_method2b
+    - efficient_loftr_method2a
+  relative: original_method1_stereo_vo
+  internal_reference: original_method2b
+
+router:
+  model: multinomial_logistic_regression
+  sklearn_training_version: 1.7.2
+  C: 1.0
+  max_iter: 2000
+  random_state: 2026
+  target: soft
+  feature_set: r3
+  feature_count: 224
+  scaler: median_mad
+  smoothing_alpha: 1.0
+  entropy_gate: false
+
+fusion:
+  variant: method6b
+  lambda_vo: 5.0
+  absolute_weight_scale: 1.0
+  vo_weight_scale: 1.0
+  huber_delta_steps: 2.5
+  alignment_iterations: 8
+  alignment_huber_mad: 2.5
+  optimizer_max_nfev: 200
+
+selection:
+  protocol: physical_session_loso
+  train_sessions: 7
+  train_sequences: 61
+  train_frames: 6095
+  released_test_used_for_selection: false
+  hidden_scores_used_for_selection: false
+
+artifact_reference:
+  workspace_path: outputs/method6_router_ensemble/final_router/router.pkl
+  size_bytes: 21348
+  sha256: 7b4c167d762e32f809455cd735c8ec40d31e7f4cbb0d5e7e4fb7545687298da2
+  config_sha256: ec934071394bf16051fd878f073bab7f9b2607343e27696f54e8782eb474ee6d

@@ -69,3 +69,17 @@ total robust objective. Per-view reprojection statistics remain diagnostics;
 they are not hard vetoes. Invalid corrections fall back to the original session
 calibration. The selected trajectory replaces only the RoMa-2A observations in
 the otherwise frozen Method-4A stack.
+
+## Method 6B — reliability-routed mixture of pose experts
+
+Method 6B uses original Method 2A, original Method 2B, and LoFTR-2A as
+absolute-pose experts. A multinomial logistic router predicts a soft reliability
+distribution per frame from inference-only PnP, calibration, cross-expert
+disagreement, and Method-1 VO-innovation diagnostics. Physical-session LOSO is
+used for router selection; no sequence or session identifier is a feature.
+
+The frozen router uses the complete R3 feature set, robust median/MAD scaling,
+soft TRAIN targets, no temporal probability smoothing, and no entropy gate.
+Its weights replace the absolute-observation confidences in the unchanged
+Method-4A VO-constrained optimizer. The rotation source, robust loss, VO
+processing, and `lambda_vo=5` remain frozen.

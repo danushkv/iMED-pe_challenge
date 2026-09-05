@@ -27,6 +27,7 @@ sequences. These numbers are not official hidden-test scores.
 | RoMa-2A | 1.0057 | 1.3089 |
 | Method 4A-1 + RoMa-2A | 0.8477 | 1.1465 |
 | **Method 5R + Method 4A-1 + RoMa-2A** | **0.8444** | 1.1447 |
+| Method 6B, routed 2A/2B/LoFTR-2A + VO | 0.8707 | **1.1357** |
 
 Bold marks the best local result in each column, not a claim of unseen-session
 superiority.
@@ -51,6 +52,7 @@ which case only development sessions may select them.
 | RoMa-2A | 1.3025 | 3.1589 |
 | Method 4A-1 + RoMa-2A | 0.8861 | 1.2388 |
 | **Method 5R + Method 4A-1 + RoMa-2A** | **0.8777** | **1.2356** |
+| Method 6B, routed 2A/2B/LoFTR-2A + VO | 0.9156 | 1.4191 |
 
 ### Released TEST: four sessions
 
@@ -67,7 +69,8 @@ which case only development sessions may select them.
 | Method 4A-1 + LoFTR-MV A+B | 1.2172 | **2.0125** |
 | RoMa-2A | 1.4205 | 2.1265 |
 | Method 4A-1 + RoMa-2A | 1.1806 | 2.0371 |
-| Method 5R + Method 4A-1 + RoMa-2A | **1.1787** | 2.0371 |
+| Method 5R + Method 4A-1 + RoMa-2A | 1.1787 | 2.0371 |
+| **Method 6B, routed 2A/2B/LoFTR-2A + VO** | **1.1663** | 2.0296 |
 
 ## Interpretation
 
@@ -84,6 +87,12 @@ which case only development sessions may select them.
   worst-session ATE was unchanged, and its tail/CV diagnostics were not
   uniformly better, so this is reported as a narrow calibration result rather
   than a new general optimizer.
+- Method 6B uses a session-held-out-trained logistic reliability router to
+  softly weight original 2A, original 2B, and LoFTR-2A observations inside the
+  frozen VO-constrained optimizer. It improved ordinary, session-balanced,
+  worst-session, and frame-p95 released-TEST metrics over 4A-LoFTR. The gains
+  are small, so it remains a final submission candidate rather than evidence
+  that routing breaks the hidden-validation plateau.
 
 Raw prediction files and evaluation JSON are intentionally excluded. Recreate
 them with the commands in `docs/RUN_METHODS.md`.
@@ -103,6 +112,7 @@ TRAIN and released-TEST evaluations above. Lower is better.
 | Method 4A-1 + LoFTR-MV A+B | 2.332 |
 | RoMa-2A standalone | 2.341 |
 | Method 4A-1 + RoMa-2A | 2.310 |
+| Method 6B | not submitted yet |
 
 \*The exact XFeat leaderboard value was not preserved in the experiment notes;
 replace this approximation if the exact score is recovered.
