@@ -273,10 +273,10 @@ If this code helps your work, please **cite us and star the repository**:
 
 ```bibtex
 @software{imed_pe_challenge_methods_2026,
-  author  = {{iMED-PE Challenge Methods contributors}},
-  title   = {iMED-PE Challenge Methods: Multi-View Endoscopic Pose Estimation},
+  author  = {Danush Kumar Venkatesh},
+  title   = {Reliability-Routed Multi-Expert Fusion for Endoscopic Pose
+              Estimation},
   year    = {2026},
-  version = {0.1.0},
   url     = {https://github.com/danushkv/iMED-pe_challenge}
 }
 ```
