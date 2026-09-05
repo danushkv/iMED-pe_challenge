@@ -1,7 +1,5 @@
 # Results
 
-> Keep this document private until the challenge permits method/result release.
-
 All values below are local evaluations with the challenge-compatible evaluator:
 one Horn/Sim(3) alignment per sequence followed by ATE. `TRAIN` contains 61
 released training sequences; released `TEST` contains 19 locally evaluable

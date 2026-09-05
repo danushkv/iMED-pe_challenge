@@ -1,14 +1,43 @@
 # iMED-PE Challenge Methods
 
-Research code for multi-view camera pose estimation developed for the iMED
-Pose Estimation Challenge. The repository contains classical stereo geometry,
-visual odometry, robust trajectory fusion, and zero-shot learned geometry
-experiments.
+Research code for multi-view camera pose estimation developed for the
+[iMED Pose Estimation Challenge](https://imed-challenge.github.io/). The
+repository contains classical stereo geometry, visual odometry, learned
+correspondence front ends, robust trajectory fusion, and a reliability-routed
+mixture of pose experts.
 
-> **Challenge embargo:** keep this repository private until the challenge
-> organizers permit publication of methods and results. The dataset, generated
-> predictions, calibration caches, plots containing challenge images, and model
-> weights are intentionally not included.
+The dataset, generated predictions, calibration caches, and third-party model
+weights are not included. The two qualitative examples below are published
+with permission from the challenge organizers.
+
+## Final result
+
+Our selected method is **Method 6B**, which routes three complementary absolute
+pose experts using inference-time geometric diagnostics and fuses their soft
+reliability-weighted observations with temporal stereo VO. On the 19-sequence
+released TEST split it achieved:
+
+| Mean ATE | Session-balanced ATE | Worst-session ATE | Frame p95 |
+|---:|---:|---:|---:|
+| **1.1357 mm** | **1.1663 mm** | **2.0296 mm** | **3.0973 mm** |
+
+These values use the challenge-compatible trajectory-level Sim(3) alignment.
+They are released-split results, not a claim about the final hidden ranking.
+
+## Qualitative results
+
+Each publication-style grid synchronizes the two stereo endoscopes with the
+ground-truth and Method 6B trajectories after the same Sim(3) alignment used
+for evaluation.
+
+| Representative sequence | Difficult sequence |
+|:---:|:---:|
+| ![Method 6B on session 004](assets/examples/method6b_session004.gif) | ![Method 6B on session 007](assets/examples/method6b_session007.gif) |
+| `session_004_scene_6_zoom_in` | `session_007_scene_5_circular` |
+
+The exact generation commands are under
+[Publication-style grids](#publication-style-grids). Full-resolution stills
+are stored beside the GIFs for use in papers and presentations.
 
 ## Implemented methods
 
@@ -25,6 +54,12 @@ experiments.
 | EfficientLoFTR | Pairwise and pure three-view LoFTR experiments for Method 2/4A |
 | RoMa-2A | Exact-index ALIKED source pixels warped into E1-R and E2-L by full RoMa |
 | Method 5-R | Geometry-only E1 stereo correction followed by RoMa-2A and frozen Method 4A |
+| **Method 6B** | **Soft reliability routing of Method 2A, Method 2B, and LoFTR-2A inside the VO-constrained fusion optimizer** |
+
+Method 6B is the best released-TEST method in this repository. It improves
+mean ATE, session-balanced ATE, worst-session ATE, and frame-p95 error over the
+original Method 4A and 4A + LoFTR-2A. The full ablation is documented in
+[`docs/METHOD6_RESULTS.md`](docs/METHOD6_RESULTS.md).
 
 The exact transform conventions are documented in
 [`docs/TRANSFORMS.md`](docs/TRANSFORMS.md). Frozen experiment settings are in
@@ -36,7 +71,8 @@ The exact transform conventions are documented in
 configs/        frozen method settings
 docs/           dataset contract, methods, results, and reproducibility notes
 environments/   separate VGGT environment
-experiments/    XFeat, EfficientLoFTR, RoMa, Method 5-R, and LOSO code
+experiments/    XFeat, EfficientLoFTR, RoMa, Method 5-R/6, and LOSO code
+models/         small project-trained artifacts (currently the Method 6 router)
 scripts/        calibration, inference, evaluation, and visualization CLIs
 src/imcpe/      shared geometry and method implementations
 tests/          dependency-free/synthetic safety checks
@@ -51,7 +87,7 @@ stack recorded separately in `environments/docker/`. Install
 [uv](https://docs.astral.sh/uv/) and run:
 
 ```bash
-git clone https://github.com/<account>/iMED-pe_challenge.git
+git clone https://github.com/danushkv/iMED-pe_challenge.git
 cd iMED-pe_challenge
 uv sync --extra dev
 uv run python scripts/check_install.py
@@ -89,7 +125,7 @@ cd ../..
 bash third_party/setup_models.sh --vggt
 ```
 
-## Dataset contract
+## Dataset format
 
 Pass the dataset at runtime; never edit source paths. The expected layout is:
 
@@ -118,7 +154,7 @@ More detail is in [`docs/DATASET.md`](docs/DATASET.md).
 Full provenance and fresh-clone checks are in
 [`docs/REPRODUCIBILITY.md`](docs/REPRODUCIBILITY.md).
 
-## Reproduce the main pipeline
+## Reproduce the main result: Method 6B
 
 All examples use shell variables so no machine-specific path enters the code:
 
@@ -127,72 +163,37 @@ export IMEDPE_DATA_ROOT=/path/to/imed_pe
 export IMEDPE_OUTPUT_ROOT=/path/to/generated_outputs
 ```
 
-### 1. Session calibration and Method 1
-
-Estimate one fixed E2 stereo transform per session, then run stereo VO:
-
-```bash
-uv run python scripts/run_stereo_calibration.py \
-  --data-root "$IMEDPE_DATA_ROOT" \
-  --session 001 \
-  --splits train \
-  --output-dir "$IMEDPE_OUTPUT_ROOT/calibration/e2"
-
-uv run python scripts/run_stereo_vo.py \
-  --data-root "$IMEDPE_DATA_ROOT" \
-  --split train \
-  --calibration-root "$IMEDPE_OUTPUT_ROOT/calibration/e2" \
-  --max-keypoints 2048 \
-  --output-root "$IMEDPE_OUTPUT_ROOT/method1"
-```
-
-Repeat calibration for every discovered session. Method 1.5 anchor generation
-and fusion are described in [`docs/RUN_METHODS.md`](docs/RUN_METHODS.md).
-
-### 2. Method 2A and Method 2B
+Method 6B consumes original Method 1, Method 1.5A rotations, Method 2A,
+Method 2B, and EfficientLoFTR-2A predictions plus their inference diagnostics.
+Run those frozen prerequisites using [`docs/RUN_METHODS.md`](docs/RUN_METHODS.md),
+then build target-free router features and apply the bundled TRAIN-fitted
+router:
 
 ```bash
-uv run python scripts/run_method2_calibration.py \
+uv run python -m experiments.method6_router_ensemble.build_dataset \
   --data-root "$IMEDPE_DATA_ROOT" \
-  --splits train \
-  --output-dir "$IMEDPE_OUTPUT_ROOT/calibration/e1"
-
-uv run python scripts/run_method2.py \
-  --data-root "$IMEDPE_DATA_ROOT" \
-  --split train \
-  --calibration-root "$IMEDPE_OUTPUT_ROOT/calibration/e1" \
-  --output-root "$IMEDPE_OUTPUT_ROOT/method2a"
-
-uv run python scripts/run_method2b.py \
-  --data-root "$IMEDPE_DATA_ROOT" \
-  --split train \
-  --calibration-root "$IMEDPE_OUTPUT_ROOT/calibration/e2" \
-  --output-root "$IMEDPE_OUTPUT_ROOT/method2b"
-```
-
-### 3. Method 4A fusion
-
-Method 4A consumes saved predictions; it does not rerun feature extraction:
-
-```bash
-uv run python scripts/run_method4a.py \
-  --split train \
+  --split test \
+  --expert 2a="$IMEDPE_OUTPUT_ROOT/method2a/pure" \
+  --expert 2b="$IMEDPE_OUTPUT_ROOT/method2b" \
+  --expert loftr="$IMEDPE_OUTPUT_ROOT/loftr_mv/method2a" \
   --method1-root "$IMEDPE_OUTPUT_ROOT/method1" \
-  --method2a-root "$IMEDPE_OUTPUT_ROOT/method2a/pure" \
-  --method2b-root "$IMEDPE_OUTPUT_ROOT/method2b" \
   --rotation-root "$IMEDPE_OUTPUT_ROOT/method1_5" \
-  --mode 4a1 \
-  --confidence-version v1 \
-  --lambda-vo 5 \
-  --output-root "$IMEDPE_OUTPUT_ROOT/method4a1"
+  --e1-calibration-diagnostics "$IMEDPE_OUTPUT_ROOT/calibration/e1" \
+  --e2-calibration-diagnostics "$IMEDPE_OUTPUT_ROOT/calibration/e2" \
+  --output-root "$IMEDPE_OUTPUT_ROOT/method6/dataset_test"
+
+uv run python -m experiments.method6_router_ensemble.predict_final \
+  --dataset-root "$IMEDPE_OUTPUT_ROOT/method6/dataset_test" \
+  --router-root models/method6 \
+  --output-root "$IMEDPE_OUTPUT_ROOT/method6/method6b"
 ```
 
-The XFeat, EfficientLoFTR, and VGGT commands are in
-[`docs/RUN_METHODS.md`](docs/RUN_METHODS.md).
-
-RoMa-2A and Method 5-R use the separate locked environment under
-`environments/roma/`. Their complete frozen commands are also documented in
-[`docs/RUN_METHODS.md`](docs/RUN_METHODS.md).
+The bundled `router.pkl` reproduces the selected scikit-learn model; the
+version-independent `router.npz`/`router.json` export is provided for deployment.
+To rebuild the router from TRAIN rather than use the frozen artifact, follow the
+strict physical-session LOSO and all-TRAIN commands in
+[`docs/RUN_METHODS.md`](docs/RUN_METHODS.md). Commands for every other method
+are documented there as well.
 
 ## Evaluation and visualizations
 
@@ -206,38 +207,48 @@ uv run python scripts/evaluate_ate.py \
   --pred-root "$IMEDPE_OUTPUT_ROOT/method4a1"
 ```
 
-Create a publication-style grid with synchronized endoscope frames and aligned
-trajectories:
+### Publication-style grids
+
+Create a compact README GIF, a full-resolution still, and an MP4 with
+synchronized endoscope frames and aligned Method 6B trajectories:
 
 ```bash
 uv run python scripts/make_comparison_video.py \
   --sequence-dir "$IMEDPE_DATA_ROOT/train/<sequence>" \
-  --prediction method1="$IMEDPE_OUTPUT_ROOT/method1/train/<sequence>/pose.txt" \
-  --prediction method2b="$IMEDPE_OUTPUT_ROOT/method2b/train/<sequence>/pose.txt" \
-  --prediction method4a="$IMEDPE_OUTPUT_ROOT/method4a1/train/<sequence>/pose.txt" \
-  --output "$IMEDPE_OUTPUT_ROOT/figures/<sequence>.mp4"
+  --prediction "Method 6B=$IMEDPE_OUTPUT_ROOT/method6/method6b/train/<sequence>/pose.txt" \
+  --output "$IMEDPE_OUTPUT_ROOT/figures/<sequence>.mp4" \
+  --still-output "assets/examples/<sequence>.png" \
+  --gif-output "assets/examples/<sequence>.gif" \
+  --gif-every 1 \
+  --gif-width 640
 ```
 
-These media files remain local and are ignored by Git. Result provenance and
-the current comparison tables are in [`docs/RESULTS.md`](docs/RESULTS.md).
+Only the curated PNG/GIF files under `assets/examples/` are versioned. Generated
+MP4 files and arbitrary dataset images remain ignored. Result provenance and
+the complete comparison tables are in [`docs/RESULTS.md`](docs/RESULTS.md).
 
 ## Checkpoints
 
-There are no challenge-trained checkpoints. All challenge-specific calibration
-and anchor caches are estimated independently per session at inference time.
+The only challenge-trained artifact is the small Method 6 logistic router under
+`models/method6/`; it contains coefficients and robust feature-scaling values,
+not image features or dataset content. All challenge-specific calibration and
+anchor caches are estimated independently per session at inference time.
 ALIKED/LightGlue, XFeat, EfficientLoFTR, RoMa, and VGGT use official third-party
 pretrained weights. Do not re-upload those weights under this project's name;
 link to their official model cards/releases and preserve their licenses.
 
-## Publication checklist
+## Citation and dataset attribution
 
-Before changing this repository from private to public:
+If this code helps your work, cite this repository using
+[`CITATION.cff`](CITATION.cff). Use of the data must additionally cite the
+[iMED Challenge](https://imed-challenge.github.io/) and the official dataset or
+challenge paper specified by the organizers; citing this software does not
+replace the dataset citation.
 
-1. Confirm the challenge embargo and dataset visualization rules.
-2. Replace the provisional `LICENSE` notice after clarifying the baseline license.
-3. Replace the GitHub account placeholder in `CITATION.cff`.
-4. Do not commit dataset frames, pose files, predictions, calibration caches, or weights.
-5. Re-run the reproducibility commands from a fresh clone and record hardware.
+## License
 
-The standalone Git initialization and push commands are in
-[`docs/PUBLISHING.md`](docs/PUBLISHING.md).
+Original contributions are released under the [MIT License](LICENSE).
+Third-party projects and weights retain their own terms; see
+[`THIRD_PARTY.md`](THIRD_PARTY.md) and [`NOTICE`](NOTICE). The upstream baseline
+currently does not publish a license, so baseline-derived files require the
+organizers' redistribution permission and are not relicensed by this project.

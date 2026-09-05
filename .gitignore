@@ -28,6 +28,15 @@ weights/
 *.jpeg
 *.mp4
 
+# Curated, organizer-approved README media are intentionally versioned.
+!assets/examples/*.gif
+!assets/examples/*.png
+
+# Frozen Method 6 router artifacts are small, TRAIN-derived project assets.
+!models/method6/router.json
+!models/method6/router.npz
+!models/method6/router.pkl
+
 # Keep repository metadata/configuration JSON if explicitly added later.
 !configs/**/*.json
 !third_party/**/*.json
@@ -43,3 +52,9 @@ third_party/vggt/
 .idea/
 .vscode/
 .DS_Store
+
+# Local release-planning notes; keep them out of the public repository.
+docs/PUBLISHING.md
+docs/REPO_DOCUMENTATION_PROMPT.md
+docker/METHOD5R_HANDOFF.md
+docker/METHOD6_HANDOFF.md

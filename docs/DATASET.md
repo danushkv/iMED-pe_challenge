@@ -33,6 +33,8 @@ Inference modules accept sequence image directories and calibration caches.
 They do not require ground truth. `pose.txt` is read only by evaluation,
 plotting, and dataset-validation utilities after predictions exist.
 
-Do not commit any dataset content. Before publishing a plot or video containing
-frames, check the dataset's redistribution and challenge rules.
-
+Do not commit raw dataset content. The challenge organizers permitted the two
+curated qualitative examples under `assets/examples/`; this permission does not
+grant general redistribution rights for the dataset. Obtain data and its
+required citation from the
+[official iMED Challenge website](https://imed-challenge.github.io/).

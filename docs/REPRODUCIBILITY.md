@@ -9,8 +9,8 @@ a2267625c51f52c5e14ec5f1cd0610ec57a44eaf
 ```
 
 Canonical method code was copied from `src/imcpe`; XFeat, EfficientLoFTR,
-RoMa-2A, Method 5-R, and LOSO code came from their isolated experiment
-directories. Generated outputs,
+RoMa-2A, Method 4C, Method 5-R, Method 6, and LOSO code came from their isolated
+experiment directories. Generated outputs,
 third-party checkouts, checkpoints, dataset files, and Python caches were not
 copied.
 
@@ -44,6 +44,11 @@ checkpoint SHA-256
 Session self-calibration is part of inference. Its outputs are caches, not
 trained checkpoints. Recreate them from the same session images and fixed
 configuration.
+
+The exception is Method 6's small TRAIN-supervised reliability router. The
+exact scikit-learn artifact and a version-independent NPZ/JSON export are
+tracked under `models/method6/`, with SHA-256 hashes documented there. Neither
+format contains images, poses, or per-sequence features.
 
 ## Result protocol
 

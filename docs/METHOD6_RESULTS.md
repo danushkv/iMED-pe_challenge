@@ -1,7 +1,5 @@
 # Method 6B results and frozen decision
 
-> Keep this document private until the challenge permits method/result release.
-
 ## Frozen method
 
 Method 6B is a soft reliability-routed mixture of three absolute-pose experts:

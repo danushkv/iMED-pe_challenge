@@ -15,6 +15,13 @@ BANNED_TEXT = (
     "/home/" + "venkateda/",
 )
 BANNED_SUFFIXES = {".npz", ".npy", ".pt", ".pth", ".ckpt", ".mp4"}
+ALLOWED_PROJECT_ARTIFACTS = {Path("models/method6/router.npz")}
+LOCAL_ONLY_PATHS = {
+    Path("docs/PUBLISHING.md"),
+    Path("docs/REPO_DOCUMENTATION_PROMPT.md"),
+    Path("docker/METHOD5R_HANDOFF.md"),
+    Path("docker/METHOD6_HANDOFF.md"),
+}
 
 
 def main() -> None:
@@ -27,7 +34,9 @@ def main() -> None:
         if not path.is_file() or ".git" in path.parts:
             continue
         relative = path.relative_to(ROOT)
-        if path.suffix.lower() in BANNED_SUFFIXES:
+        if relative in LOCAL_ONLY_PATHS:
+            continue
+        if path.suffix.lower() in BANNED_SUFFIXES and relative not in ALLOWED_PROJECT_ARTIFACTS:
             failures.append(f"generated/model artifact: {relative}")
         if path.stat().st_size > args.max_file_mib * 1024 * 1024:
             failures.append(f"large file: {relative} ({path.stat().st_size} bytes)")

@@ -6,5 +6,9 @@ authors:
   - name: "iMED-PE challenge submission authors"
 version: 0.1.0
 date-released: 2026-08-24
-repository-code: "https://github.com/REPLACE_WITH_ACCOUNT/iMED-pe_challenge"
-
+license: MIT
+repository-code: "https://github.com/danushkv/iMED-pe_challenge"
+references:
+  - type: website
+    title: "iMED Challenge 2026"
+    url: "https://imed-challenge.github.io/"

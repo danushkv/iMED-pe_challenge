@@ -1,0 +1,37 @@
+iMED-PE Challenge Methods
+Copyright (c) 2026 iMED-PE Challenge Methods contributors
+
+The MIT License in LICENSE applies to the original contributions in this
+repository. It does not relicense third-party source, pretrained weights,
+datasets, or material derived from the official iMED-PE baseline.
+
+The following files originated in, or were derived from, the official iMED-PE
+baseline repository at commit a2267625c51f52c5e14ec5f1cd0610ec57a44eaf:
+
+  scripts/entrypoint.py
+  scripts/evaluate_ate.py
+  scripts/plot_trajectories.py
+  scripts/run_baseline.py
+  src/imcpe/__init__.py
+  src/imcpe/alignment.py
+  src/imcpe/data_io.py
+  src/imcpe/geometry.py
+  src/imcpe/inference.py
+  src/imcpe/io_pose.py
+  src/imcpe/matcher.py
+  src/imcpe/pose_metrics.py
+  src/imcpe/rpe.py
+  src/imcpe/trajectory.py
+
+The upstream baseline repository did not contain a license at the evaluated
+commit and did not display one when this release was prepared. Those files
+remain subject to the rights and permissions granted by their copyright
+holders and challenge organizers. Obtain confirmation from the organizers
+before redistributing them.
+
+All third-party projects and model weights remain under their respective
+licenses and model terms. See THIRD_PARTY.md and third_party/manifest.yaml.
+
+The iMED dataset is not distributed by this repository. Obtain it through the
+official challenge and follow its access, use, redistribution, and citation
+requirements: https://imed-challenge.github.io/

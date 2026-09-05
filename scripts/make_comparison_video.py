@@ -15,6 +15,7 @@ from pathlib import Path
 import cv2
 import matplotlib
 import numpy as np
+from PIL import Image
 
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt  # noqa: E402
@@ -78,27 +79,11 @@ def load_rgb(path: Path) -> np.ndarray:
     return cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
 
-def projection_basis(gt: dict[int, np.ndarray]) -> tuple[np.ndarray, np.ndarray]:
-    points = np.stack(list(gt.values()))
-    center = points.mean(axis=0)
-    _, _, right = np.linalg.svd(points - center, full_matrices=False)
-    return center, right[:2].T
-
-
-def project(point: np.ndarray, center: np.ndarray, basis: np.ndarray) -> np.ndarray:
-    return (np.asarray(point) - center) @ basis
-
-
-def trajectory_xy(
-    values: dict[int, np.ndarray],
-    frame_ids: list[int],
-    center: np.ndarray,
-    basis: np.ndarray,
-) -> np.ndarray:
-    output = np.full((len(frame_ids), 2), np.nan, dtype=np.float64)
+def trajectory_xyz(values: dict[int, np.ndarray], frame_ids: list[int]) -> np.ndarray:
+    output = np.full((len(frame_ids), 3), np.nan, dtype=np.float64)
     for position, frame_id in enumerate(frame_ids):
         if frame_id in values:
-            output[position] = project(values[frame_id], center, basis)
+            output[position] = values[frame_id]
     return output
 
 
@@ -114,10 +99,32 @@ def main() -> None:
     )
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--still-output", type=Path, default=None)
+    parser.add_argument(
+        "--gif-output",
+        type=Path,
+        default=None,
+        help="Optional compact animated GIF suitable for a GitHub README.",
+    )
+    parser.add_argument(
+        "--gif-every",
+        type=int,
+        default=1,
+        help="Keep every Nth rendered frame in the GIF (default: 1, no skipping).",
+    )
+    parser.add_argument(
+        "--gif-width",
+        type=int,
+        default=720,
+        help="Resize the GIF to this width while preserving aspect ratio.",
+    )
     parser.add_argument("--fps", type=float, default=10.0)
     parser.add_argument("--max-frames", type=int, default=None)
     parser.add_argument("--dpi", type=int, default=100)
     args = parser.parse_args()
+    if args.gif_every < 1:
+        raise ValueError("--gif-every must be at least 1")
+    if args.gif_width < 1:
+        raise ValueError("--gif-width must be positive")
 
     gt_path = args.sequence_dir / "pose.txt"
     if not gt_path.is_file():
@@ -141,17 +148,17 @@ def main() -> None:
         Trajectory(label, align_prediction(gt, read_pose_txt(path)))
         for label, path in args.prediction
     ]
-    center, basis = projection_basis(gt)
-    gt_xy = trajectory_xy(gt, frame_ids, center, basis)
-    pred_xy = {
-        item.label: trajectory_xy(item.by_frame, frame_ids, center, basis)
+    gt_xyz = trajectory_xyz(gt, frame_ids)
+    pred_xyz = {
+        item.label: trajectory_xyz(item.by_frame, frame_ids)
         for item in predictions
     }
-    all_xy = [gt_xy, *pred_xy.values()]
-    finite = np.concatenate([array[np.isfinite(array).all(axis=1)] for array in all_xy])
+    all_xyz = [gt_xyz, *pred_xyz.values()]
+    finite = np.concatenate([array[np.isfinite(array).all(axis=1)] for array in all_xyz])
     lower = finite.min(axis=0)
     upper = finite.max(axis=0)
-    padding = np.maximum(0.05 * (upper - lower), 1e-6)
+    plot_center = 0.5 * (lower + upper)
+    plot_radius = max(0.525 * float(np.max(upper - lower)), 1.0e-6)
 
     num_columns = 2 + len(predictions)
     figure = plt.figure(figsize=(4.0 * num_columns, 6.4), dpi=args.dpi)
@@ -161,7 +168,10 @@ def main() -> None:
         for row in range(2)
     ]
     # Each image axis contains a horizontal stereo pair.
-    trajectory_axes = [figure.add_subplot(grid[:, column]) for column in range(1, num_columns)]
+    trajectory_axes = [
+        figure.add_subplot(grid[:, column], projection="3d")
+        for column in range(1, num_columns)
+    ]
 
     first = load_rgb(images["E1-L"][frame_ids[0]])
     display_height, display_width = first.shape[:2]
@@ -176,6 +186,7 @@ def main() -> None:
     )
     if not writer.isOpened():
         raise RuntimeError(f"Cannot open video writer for {args.output}")
+    gif_frames: list[Image.Image] = []
 
     labels = ["Ground truth", *[item.label for item in predictions]]
     try:
@@ -198,17 +209,39 @@ def main() -> None:
             for column, (axis, label) in enumerate(zip(trajectory_axes, labels)):
                 axis.clear()
                 upto = frame_number + 1
-                axis.plot(gt_xy[:upto, 0], gt_xy[:upto, 1], color="black", lw=2, label="GT")
+                axis.plot(
+                    gt_xyz[:upto, 0],
+                    gt_xyz[:upto, 1],
+                    gt_xyz[:upto, 2],
+                    color="black",
+                    lw=2,
+                    label="GT",
+                )
                 if column > 0:
-                    values = pred_xy[label]
-                    axis.plot(values[:upto, 0], values[:upto, 1], lw=2, label=label)
-                axis.scatter(gt_xy[frame_number, 0], gt_xy[frame_number, 1], color="black", s=24)
-                axis.set_xlim(lower[0] - padding[0], upper[0] + padding[0])
-                axis.set_ylim(lower[1] - padding[1], upper[1] + padding[1])
-                axis.set_aspect("equal", adjustable="box")
+                    values = pred_xyz[label]
+                    axis.plot(
+                        values[:upto, 0],
+                        values[:upto, 1],
+                        values[:upto, 2],
+                        lw=2,
+                        label=label,
+                    )
+                axis.scatter(
+                    gt_xyz[frame_number, 0],
+                    gt_xyz[frame_number, 1],
+                    gt_xyz[frame_number, 2],
+                    color="black",
+                    s=24,
+                )
+                axis.set_xlim(plot_center[0] - plot_radius, plot_center[0] + plot_radius)
+                axis.set_ylim(plot_center[1] - plot_radius, plot_center[1] + plot_radius)
+                axis.set_zlim(plot_center[2] - plot_radius, plot_center[2] + plot_radius)
+                axis.set_box_aspect((1, 1, 1))
+                axis.view_init(elev=22, azim=-60)
                 axis.set_title(label)
-                axis.set_xlabel("principal trajectory axis 1 (mm)")
-                axis.set_ylabel("principal trajectory axis 2 (mm)")
+                axis.set_xlabel("x (mm)")
+                axis.set_ylabel("y (mm)")
+                axis.set_zlabel("z (mm)")
                 axis.grid(alpha=0.25)
                 axis.legend(loc="best", fontsize=8)
 
@@ -220,6 +253,15 @@ def main() -> None:
             if bgr.shape[1] != video_width or bgr.shape[0] != video_height:
                 bgr = cv2.resize(bgr, (video_width, video_height))
             writer.write(bgr)
+            if args.gif_output is not None and frame_number % args.gif_every == 0:
+                gif_height = max(1, round(video_height * args.gif_width / video_width))
+                gif_bgr = cv2.resize(
+                    bgr,
+                    (args.gif_width, gif_height),
+                    interpolation=cv2.INTER_AREA,
+                )
+                gif_rgb = cv2.cvtColor(gif_bgr, cv2.COLOR_BGR2RGB)
+                gif_frames.append(Image.fromarray(gif_rgb))
         if args.still_output is not None:
             args.still_output.parent.mkdir(parents=True, exist_ok=True)
             figure.savefig(args.still_output, bbox_inches="tight")
@@ -227,8 +269,22 @@ def main() -> None:
         writer.release()
         plt.close(figure)
     print(f"Saved: {args.output}")
+    if args.gif_output is not None:
+        if not gif_frames:
+            raise RuntimeError("No frames were available for GIF output")
+        args.gif_output.parent.mkdir(parents=True, exist_ok=True)
+        duration_ms = max(20, round(1000.0 * args.gif_every / args.fps))
+        gif_frames[0].save(
+            args.gif_output,
+            save_all=True,
+            append_images=gif_frames[1:],
+            duration=duration_ms,
+            loop=0,
+            optimize=True,
+            disposal=2,
+        )
+        print(f"Saved: {args.gif_output}")
 
 
 if __name__ == "__main__":
     main()
-

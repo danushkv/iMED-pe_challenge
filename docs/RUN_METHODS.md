@@ -355,6 +355,79 @@ estimation, selection, and prediction from that split's images. Never reuse a
 calibration from another physical session or bundle released TRAIN/TEST
 calibration outputs in a submission.
 
+## Method 6B — selected routed ensemble
+
+Method 6B uses original Method 2A, original Method 2B, LoFTR-MV 2A, Method 1
+VO, and the Method 1.5A rotation source. Run those methods first using the
+commands above. The router consumes their saved inference diagnostics and does
+not rerun image matching.
+
+Build the supervised TRAIN router dataset. Ground truth is read here only to
+construct TRAIN reliability targets:
+
+```bash
+uv run python -m experiments.method6_router_ensemble.build_dataset \
+  --data-root "$IMEDPE_DATA_ROOT" \
+  --split train \
+  --expert 2a="$IMEDPE_OUTPUT_ROOT/method2a/pure" \
+  --expert 2b="$IMEDPE_OUTPUT_ROOT/method2b" \
+  --expert loftr="$IMEDPE_OUTPUT_ROOT/loftr_mv/method2a" \
+  --method1-root "$IMEDPE_OUTPUT_ROOT/method1" \
+  --rotation-root "$IMEDPE_OUTPUT_ROOT/method1_5" \
+  --e1-calibration-diagnostics "$IMEDPE_OUTPUT_ROOT/calibration/e1" \
+  --e2-calibration-diagnostics "$IMEDPE_OUTPUT_ROOT/calibration/e2" \
+  --with-train-targets \
+  --output-root "$IMEDPE_OUTPUT_ROOT/method6/dataset_train"
+```
+
+Reproduce the selected physical-session LOSO configuration, then fit one final
+router on all TRAIN sessions:
+
+```bash
+uv run python -m experiments.method6_router_ensemble.evaluate_loso \
+  --dataset-root "$IMEDPE_OUTPUT_ROOT/method6/dataset_train" \
+  --model logistic \
+  --feature-set r3 \
+  --smoothing-alpha 1 \
+  --output-root "$IMEDPE_OUTPUT_ROOT/method6/loso_logistic_r3"
+
+uv run python -m experiments.method6_router_ensemble.train_final \
+  --dataset-root "$IMEDPE_OUTPUT_ROOT/method6/dataset_train" \
+  --model logistic \
+  --feature-set r3 \
+  --smoothing-alpha 1 \
+  --output-root "$IMEDPE_OUTPUT_ROOT/method6/final_router"
+```
+
+For a target split, build inference-only features without
+`--with-train-targets`, then apply either the newly trained router or the
+bundled frozen router under `models/method6/`:
+
+```bash
+uv run python -m experiments.method6_router_ensemble.build_dataset \
+  --data-root "$IMEDPE_DATA_ROOT" \
+  --split test \
+  --expert 2a="$IMEDPE_OUTPUT_ROOT/method2a/pure" \
+  --expert 2b="$IMEDPE_OUTPUT_ROOT/method2b" \
+  --expert loftr="$IMEDPE_OUTPUT_ROOT/loftr_mv/method2a" \
+  --method1-root "$IMEDPE_OUTPUT_ROOT/method1" \
+  --rotation-root "$IMEDPE_OUTPUT_ROOT/method1_5" \
+  --e1-calibration-diagnostics "$IMEDPE_OUTPUT_ROOT/calibration/e1" \
+  --e2-calibration-diagnostics "$IMEDPE_OUTPUT_ROOT/calibration/e2" \
+  --output-root "$IMEDPE_OUTPUT_ROOT/method6/dataset_test"
+
+uv run python -m experiments.method6_router_ensemble.predict_final \
+  --dataset-root "$IMEDPE_OUTPUT_ROOT/method6/dataset_test" \
+  --router-root models/method6 \
+  --output-root "$IMEDPE_OUTPUT_ROOT/method6/method6b"
+```
+
+The frozen project artifact contains no images or poses. `router.pkl` is the
+exact scikit-learn 1.7.2 artifact used by the research CLI; `router.npz` and
+`router.json` provide an equivalent, version-independent deployment export.
+The frozen feature schema, hashes, and ablations are documented in
+[`METHOD6_RESULTS.md`](METHOD6_RESULTS.md).
+
 ## Evaluation
 
 ```bash
